@@ -1,12 +1,11 @@
 <?php
-
-session_start();
+if (session_status() == PHP_SESSION_NONE)
+    session_start();
 
 if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != true) {
     header("location: login.php");
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,7 +14,6 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
     <!-- css     -->
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -28,10 +26,8 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css.map" rel="stylesheet">
     <!-- css -->
-
-
     <link rel="stylesheet" href="./styles.css">
-    <title>Home Page</title>
+    <title>All Seizings</title>
 </head>
 
 <body>
@@ -40,6 +36,9 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
             V.F.I.N. Welcomes
 
             <?php
+            if (session_status() == PHP_SESSION_NONE) {
+                session_start();
+            }
             include "dbconnect.php";
             $qry = 'SELECT name FROM user WHERE email = "' . $_SESSION['EMAIL'] . '" ;';
             // echo var_dump($qry);
@@ -59,13 +58,58 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <div class="container-fluid">
 
         <div class="row">
-            <div class="col-8 d-flex justify-content-center text-center" style="align-items:center;">
-                <div class="row">
-                    <form method="POST" action="./vehicle_details.php">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Enter Vehicle Number" aria-label="Search" name="Search"><br>
-                        <input type="submit" class="btn btn-outline-success" value="Get Details">
 
-                    </form>
+            <div class="col-8 d-flex justify-content-center text-center vr" style="align-items :center;">
+                <div class="right">
+                    <?php
+                    include "dbconnect.php";
+                    // echo var_dump($qry);
+                    $qry = 'SELECT * FROM seized ORDER BY date DESC;';
+                    $result = mysqli_query($link, $qry);
+                    // echo var_dump($result);
+                    if (mysqli_num_rows($result) > 0) {
+                        echo '<div class="container">
+                    <h4>Seized Vehicles</h4>
+                    <br>
+                    <table class="table table-striped">
+                      <thead>
+                        <tr>
+                        <th></th>
+                          <th scope="col">VID</th>
+                          <th scope="col">Agent Email</th>
+                          <th scope="col">Date</th>
+                          <th></th>
+                          
+                        </tr>
+                      </thead>
+                      <tbody>
+                ';
+
+                        while (($row = mysqli_fetch_array($result))) {
+                            echo '<tr>
+                            <td>
+                          <form method="post" action="./vehicle_details.php">
+                          <button type="submit" name="Search" value = "' . $row["v_id"] . '" class="btn btn-outline-success btn-sm">Get Vehicle Details</button>
+                          </form>
+                          </td>
+                          <td>' . $row["v_id"] . '</th>
+                          <td>' . $row["email"] . '</td>
+                          <td>' . $row["date"] . '</td>
+                          
+
+                          <td>
+                          <form method="post" action="./release.php">
+                          <button type="submit" name="Search" value = "' . $row["v_id"] . '" class="btn btn-outline-danger btn-sm">Release Vehicle</button>
+                          </form>
+                          </td>
+                        </tr>';
+                        }
+                        echo '</tbody></table></div>';
+                    } else {
+                        echo "0 results";
+                    }
+                    ?>
+
                 </div>
             </div>
 
@@ -83,8 +127,11 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
 
                 </div>
             </div>
+
+
         </div>
     </div>
+
     <footer class="row" style="background-color:#d1ddeb; margin-top: 2em;">
         <div class="container">
             <div class="row row-footer">
@@ -116,6 +163,7 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
             </div>
         </div>
     </footer>
+
 </body>
 
 </html>

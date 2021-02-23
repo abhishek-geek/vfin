@@ -1,0 +1,26 @@
+.right a {
+  width: 100%;
+}
+.vr {
+  height: 100%;
+  width: 1px;
+  border-left: 1px solid gray;
+  /*display: inline-block;*/
+  /*margin: 0 auto;*/
+  position: sticky;
+}
+/* .jumbotron {
+  position: relative;
+} */
+img {
+  height: 25vh;
+}
+
+hr {
+  width: 100%;
+  size: 20px;
+}
+
+.br {
+  border-right: solid 1px darkcyan;
+}

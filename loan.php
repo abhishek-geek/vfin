@@ -15,7 +15,6 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
     <!-- css     -->
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -28,10 +27,8 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css.map" rel="stylesheet">
     <!-- css -->
-
-
     <link rel="stylesheet" href="./styles.css">
-    <title>Home Page</title>
+    <title>Loan Details</title>
 </head>
 
 <body>
@@ -40,6 +37,7 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
             V.F.I.N. Welcomes
 
             <?php
+            //session_start();
             include "dbconnect.php";
             $qry = 'SELECT name FROM user WHERE email = "' . $_SESSION['EMAIL'] . '" ;';
             // echo var_dump($qry);
@@ -59,13 +57,91 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
     <div class="container-fluid">
 
         <div class="row">
-            <div class="col-8 d-flex justify-content-center text-center" style="align-items:center;">
-                <div class="row">
-                    <form method="POST" action="./vehicle_details.php">
-                        <input class="form-control mr-sm-2" type="search" placeholder="Enter Vehicle Number" aria-label="Search" name="Search"><br>
-                        <input type="submit" class="btn btn-outline-success" value="Get Details">
 
-                    </form>
+
+
+
+            <div class="col-8 d-flex justify-content-center text-center vr" style="align-items :center;">
+                <div class="right">
+                    <?php
+                    include "dbconnect.php";
+                    $vid = $_POST['loan'];
+                    $qry = 'SELECT * FROM loan WHERE v_id = "' . $vid . '" ;';
+                    // echo var_dump($qry);
+                    $result = mysqli_query($link, $qry);
+                    // echo var_dump($result);
+                    if (mysqli_num_rows($result) > 0) {
+                        // output data of each row
+                        $row = mysqli_fetch_assoc($result);
+                        $f_id = $row["f_id"];
+                        $loan_id = $row["loan_id"];
+                        $loan_amount = $row["loan_ammount"];
+                        $due_amount = $row["due_ammount"];
+                        //Checking for seizable ---------
+                        $seizable = "No";
+                        if ($due_amount >= $loan_amount * 0.1) {
+                            $seizable = "Yes";
+                        }
+                        $qry2 = 'SELECT name FROM financer WHERE f_id = "' . $f_id . '" ;';
+                        // echo var_dump($qry);
+                        $result2 = mysqli_query($link, $qry2);
+                        $f_name = mysqli_fetch_assoc($result2)['name'];
+                        echo '<div class="container">
+                            <h4>Loan Details</h4>
+                            <br>
+                            <table class="table table-striped">
+                                <tbody>
+                                
+                                <tr>
+                                    <td>VID</td>
+                                    <th>' . $vid . '</th>
+                                </tr>
+                                <tr>
+                                    <td>Financer</td>
+                                    <th>' . $f_name . '</th>
+                                </tr>
+                                <tr>
+                                    <td>Loan ID</td>
+                                    <th>' . $loan_id . '</th>
+                                </tr>
+                                <tr>
+                                    <td>Loan Amount</td>
+                                    <th>' . $loan_amount . '</th>
+                                </tr>
+                                <tr>
+                                    <td>Due Amount</td>
+                                    <th>' . $due_amount . '</th>
+                                </tr>
+                                <tr>
+                                    <td>Seizable</td>
+                                    <th>' . $seizable . '</th>
+                                </tr>
+                                <tr>
+                                    <td colspan = 2>
+                                    ' . btn($seizable, $vid) . '
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        ';
+                    } else {
+                        echo "0 results";
+                    }
+                    function btn($seizable, $vid)
+                    {
+                        if ($seizable == "Yes") {
+                            return '<form method="post" action="./seize.php">
+                            <button type="submit" name="seize" value="' . $vid . '" class="btn btn-outline-success btn-lg">Seize Vehicle</button>
+                            </form>';
+                        }
+
+                        return '<form method="post" action="./index.php">
+                            <button type="submit" class="btn btn-outline-success btn-lg">Check another Vehicle</button>
+                            </form>';
+                    }
+                    ?>
+
                 </div>
             </div>
 
@@ -83,8 +159,11 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
 
                 </div>
             </div>
+
+
         </div>
     </div>
+
     <footer class="row" style="background-color:#d1ddeb; margin-top: 2em;">
         <div class="container">
             <div class="row row-footer">
@@ -116,6 +195,7 @@ if (!isset($_SESSION['IS_AUTHENTICATED']) || $_SESSION['IS_AUTHENTICATED'] != tr
             </div>
         </div>
     </footer>
+
 </body>
 
 </html>
